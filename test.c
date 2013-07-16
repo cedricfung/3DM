@@ -1,7 +1,6 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <math.h>
 #include <time.h>
 #include <assert.h>
@@ -40,6 +39,7 @@
 
 vec4d u = {1, 2, 3, 4};
 vec4d v = {7, 7, 7, 7};
+vec4d z = {0, 0, 0, 0};
 mat4d m = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 mat4d n = {7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
 mat4d I = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
@@ -140,9 +140,11 @@ void test_vec4()
 
   assert(vec4d_length(u) == sqrt(uu_dot_product));
   assert(vec4d_length(v) == sqrt(vv_dot_product));
+  assert(vec4d_length(z) == 0);
 
   assert_vec4d_equal(vec4d_normalize(u), (u / vec4d_length(u)));
   assert_vec4d_equal(vec4d_normalize(v), (v / vec4d_length(v)));
+  assert_vec4d_equal(vec4d_normalize(z), z);
 
   assert_mat4d_equal(vec4d_cross_matrix(u), u_cross_matrix);
   assert_mat4d_equal(vec4d_cross_matrix(v), v_cross_matrix);
@@ -208,6 +210,7 @@ void test_mat4()
 
   assert_mat4d_equal(mat4d_frustum(-2, 3, -3, 2, 1, 2000), r_frustum);
   assert_mat4d_equal(mat4d_ortho(-2, 3, -3, 2, 1, 2000), r_ortho);
+  assert_mat4d_equal(mat4d_look_at((vec4d){1}, (vec4d){1}, (vec4d){0,1}), I);
   assert_mat4d_equal(mat4d_look_at((vec4d){1,1,1,0}, (vec4d){0,0,1,0}, (vec4d){0,0.5,0.5,0}), r_look_at);
 
   test_end("test_mat4");

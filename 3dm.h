@@ -30,6 +30,7 @@
 
 #ifndef _3DM_H
 #define _3DM_H
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {

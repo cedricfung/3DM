@@ -30,7 +30,6 @@
 
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <stdbool.h>
 #include <math.h>
 #include "3dm.h"
 
@@ -51,7 +50,8 @@ double vec4d_length(vec4d v)
 
 vec4d vec4d_normalize(vec4d v)
 {
-  return v / vec4d_length(v);
+  double l = vec4d_length(v);
+  return l == 0 ? v : v / l;
 }
 
 mat4d vec4d_cross_matrix(vec4d v)
@@ -199,14 +199,9 @@ mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up)
     return mat4d_identity();
   }
 
-  z = eye - center;
-  z = vec4d_normalize(z);
-
-  x = vec4d_cross_product(up, z);
-  x = vec4d_normalize(x);
-
-  y = vec4d_cross_product(z, x);
-  y = vec4d_normalize(y);
+  z = vec4d_normalize(eye - center);
+  x = vec4d_normalize(vec4d_cross_product(up, z));
+  y = vec4d_normalize(vec4d_cross_product(z, x));
 
   m[0] = x[0];
   m[1] = y[0];
