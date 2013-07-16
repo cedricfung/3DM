@@ -1,7 +1,9 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 #include <assert.h>
 #include "3dm.h"
 
@@ -24,8 +26,17 @@
   } \
 } while (0)
 
-#define test_begin(name) printf("TEST BEGIN: %s\n", name)
-#define test_end(name) printf("TEST END: %s\n\n", name)
+#define test_begin(name) \
+  struct timespec ts; do { \
+    clock_gettime(CLOCK_REALTIME, &ts); \
+    printf("TEST BEGIN: %s\n", name); \
+  } while (0)
+#define test_end(name) do { \
+  struct timespec tp; \
+  clock_gettime(CLOCK_REALTIME, &tp); \
+  long us = (tp.tv_sec - ts.tv_sec) * 1000000 + (tp.tv_nsec - ts.tv_nsec) / 1000; \
+  printf("TEST END: %s\t TIME(us): %ld\n\n", name, us); \
+} while (0)
 
 vec4d u = {1, 2, 3, 4};
 vec4d v = {7, 7, 7, 7};
@@ -76,6 +87,31 @@ vec4d mv_multiply = {70, 182, 294, 406};
 mat4d I123_scale = {1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1};
 mat4d I123_translate = {1, 0, 0, 1, 0, 1, 0, 2, 0, 0, 1, 3, 0, 0, 0, 1};
 mat4d I123_scale_123_translate = {1, 0, 0, 1, 0, 2, 0, 2, 0, 0, 3, 3, 0, 0, 0, 1};
+
+mat4d r_frustum = {0.40000000000000002220446049250313, 0, 0, 0, 0,
+  0.40000000000000002220446049250313, 0, 0,
+  0.20000000000000001110223024625157,
+  -0.20000000000000001110223024625157,
+  -1.00100050025012499155252498894697, -1, 0, 0,
+  -2.00100050025012521359712991397828, 0};
+mat4d r_ortho = {0.40000000000000002220446049250313, 0, 0, 0, 0,
+  0.40000000000000002220446049250313, 0, 0, 0, 0,
+  -0.00100050025012506245934706949896, 0,
+  -0.20000000000000001110223024625157,
+  0.20000000000000001110223024625157,
+  -1.00100050025012499155252498894697, 1};
+mat4d r_look_at = {-0.57735026918962573105886804114562,
+  -0.40824829046386301723003953156876,
+  0.70710678118654746171500846685376, 0,
+  0.57735026918962573105886804114562,
+  0.40824829046386301723003953156876,
+  0.70710678118654746171500846685376, 0,
+  -0.57735026918962573105886804114562,
+  0.81649658092772603446007906313753, 0, 0,
+  0.57735026918962573105886804114562,
+  -0.81649658092772603446007906313753,
+  -1.41421356237309492343001693370752, 1};
+
 
 void test_equal()
 {
@@ -169,6 +205,11 @@ void test_mat4()
 
   assert_mat4d_equal(mat4d_translate(mat4d_scale(I, 1, 2, 3), 1, 2, 3), I123_scale_123_translate);
   assert_mat4d_equal(mat4d_translate(mat4d_scale(m, 1, 2, 3), 1, 2, 3), mat4d_multiply(I123_scale_123_translate, m));
+
+  assert_mat4d_equal(mat4d_frustum(-2, 3, -3, 2, 1, 2000), r_frustum);
+  assert_mat4d_equal(mat4d_ortho(-2, 3, -3, 2, 1, 2000), r_ortho);
+  assert_mat4d_equal(mat4d_look_at((vec4d){1,1,1,0}, (vec4d){0,0,1,0}, (vec4d){0,0.5,0.5,0}), r_look_at);
+
   test_end("test_mat4");
 }
 

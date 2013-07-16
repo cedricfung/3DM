@@ -51,7 +51,7 @@ double vec4d_length(vec4d v)
 
 vec4d vec4d_normalize(vec4d v)
 {
-  return (v / vec4d_length(v));
+  return v / vec4d_length(v);
 }
 
 mat4d vec4d_cross_matrix(vec4d v)
@@ -148,9 +148,9 @@ mat4d mat4d_translate(mat4d m, double x, double y, double z)
 mat4d mat4d_rotate(mat4d m, vec4d axis, double degree)
 {
   double rad = degree * M_PI / 180;
-  double sin_r = sin(rad), cos_r = cos(rad);
+  double s = sin(rad), c = cos(rad);
   vec4d u = vec4d_normalize(axis);
-  mat4d rotate = mat4d_identity() * cos_r + sin_r * vec4d_cross_matrix(axis) + (1 - cos_r) * vec4d_tensor_product(u, u);
+  mat4d rotate = c * mat4d_identity() + s * vec4d_cross_matrix(axis) + (1 - c) * vec4d_tensor_product(u, u);
   rotate[15] = 1;
   return mat4d_multiply(rotate, m);
 }
