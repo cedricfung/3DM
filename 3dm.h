@@ -36,10 +36,25 @@
 extern "C" {
 #endif
 
-typedef float vec4f __attribute__((vector_size (16)));
-typedef float mat4f __attribute__((vector_size (64)));
-typedef double vec4d __attribute__((vector_size (32)));
-typedef double mat4d __attribute__((vector_size (128)));
+typedef float vec4f __attribute__((vector_size(16)));
+typedef float mat4f __attribute__((vector_size(64)));
+typedef double vec4d __attribute__((vector_size(32)));
+typedef double mat4d __attribute__((vector_size(128)));
+
+#define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
+
+#define vector_ptr(type,v) ((type *)&(v))
+
+#define vector_print(v,n) do { \
+  for (int i = 0; i < n; i++) { \
+    if (i % 4 == 3) { \
+      printf("%f\n", (v)[i]); \
+    } else { \
+      printf("%f\t", (v)[i]); \
+    } \
+  } \
+  printf("\n"); \
+} while (0)
 
 double vec4d_sum(vec4d v);
 
@@ -88,24 +103,6 @@ mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up);
 mat4f mat4d_to_mat4f(mat4d m);
 
 bool mat4d_equal(mat4d m, mat4d n);
-
-#define vec4_print(v)  do { \
-  for (int i = 0; i < 4; i++) { \
-    printf("%f\t", v[i]); \
-  } \
-  printf("\n"); \
-} while (0)
-
-#define mat4_print(m) do { \
-  for (int i = 0; i < 16; i++) { \
-    if (i % 4 == 3) { \
-      printf("%f\n", m[i]); \
-    } else { \
-      printf("%f\t", m[i]); \
-    } \
-  } \
-  printf("\n"); \
-} while (0)
 
 #ifdef __cplusplus
 }

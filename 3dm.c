@@ -103,7 +103,8 @@ mat4d mat4d_from_vec4d(vec4d r0, vec4d r1, vec4d r2, vec4d r3)
 
 mat4d mat4d_transpose(mat4d m)
 {
-  return mat4d_from_vec4d(mat4d_column(m, 0), mat4d_column(m, 1), mat4d_column(m, 2), mat4d_column(m, 3));
+  vector(long, 16) mask = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
+  return __builtin_shuffle(m, mask);
 }
 
 mat4d mat4d_multiply(mat4d m, mat4d n)
@@ -121,9 +122,9 @@ vec4d mat4d_multiply_vec4d(mat4d m, vec4d v)
 {
   return (vec4d){
     vec4d_dot_product(mat4d_row(m, 0), v),
-    vec4d_dot_product(mat4d_row(m, 1), v),
-    vec4d_dot_product(mat4d_row(m, 2), v),
-    vec4d_dot_product(mat4d_row(m, 3), v)
+      vec4d_dot_product(mat4d_row(m, 1), v),
+      vec4d_dot_product(mat4d_row(m, 2), v),
+      vec4d_dot_product(mat4d_row(m, 3), v)
   };
 }
 

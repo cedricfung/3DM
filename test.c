@@ -9,8 +9,8 @@
 #define assert_vec4d_equal(u, v) do { \
   if (!vec4d_equal(u, v)) { \
     fprintf(stderr, "assert_vec4d_equal: %d\n", __LINE__); \
-    vec4_print(u); \
-    vec4_print(v); \
+    vector_print(u, 4); \
+    vector_print(v, 4); \
     abort(); \
   } \
 } while (0)
@@ -18,8 +18,8 @@
 #define assert_mat4d_equal(m, n) do { \
   if (!mat4d_equal(m, n)) { \
     fprintf(stderr, "assert_mat4d_equal: %d\n", __LINE__); \
-    mat4_print(m); \
-    mat4_print(n); \
+    vector_print(m, 16); \
+    vector_print(n, 16); \
     abort(); \
   } \
 } while (0)
@@ -110,6 +110,18 @@ mat4d r_look_at = {-0.57735026918962573105886804114562,
   0.70710678118654746171500846685376,
   0.70710678118654746171500846685376, 0,
   -1.41421356237309492343001693370752, 0, 0, 0, 1};
+
+void test_vector()
+{
+  test_begin("test_vector");
+  vector(double, 4) v = {1.0, 2.01, 3.007, 4.5};
+  assert(v[0] == 1.0);
+  assert(v[1] == 2.01);
+  assert(v[3] == 4.5);
+  assert(*vector_ptr(double, v) == 1.0);
+  assert(*(vector_ptr(double, v) + 2) == 3.007);
+  test_end("test_vector");
+}
 
 void test_equal()
 {
@@ -216,6 +228,7 @@ void test_mat4()
 
 int main(int argc, const char *argv[])
 {
+  test_vector();
   test_equal();
   test_vec4();
   test_mat4();
