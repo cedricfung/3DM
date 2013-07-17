@@ -158,14 +158,13 @@ mat4d mat4d_rotate(mat4d m, vec4d axis, double degree)
 mat4d mat4d_frustum(double l, double r, double b, double t, double n, double f)
 {
   mat4d m = {0};
-  double rl = (r - l), tb = (t - b), fn = (f - n);
-  m[0] = (n * 2) / rl;
-  m[5] = (n * 2) / tb;
-  m[8] = (r + l) / rl;
-  m[9] = (t + b) / tb;
-  m[10] = -(f + n) / fn;
-  m[11] = -1;
-  m[14] = -(f * n * 2) / fn;
+  m[0] = (2 * n) / (r - l);
+  m[2] = (r + l) / (r - l);
+  m[5] = (2 * n) / (t - b);
+  m[6] = (t + b) / (t - b);
+  m[10] = -(f + n) / (f - n);
+  m[11] = -(2 * f * n) / (f - n);
+  m[14] = -1;
   return m;
 }
 
@@ -179,20 +178,18 @@ mat4d mat4d_perspective(double fov, double aspect, double n, double f)
 mat4d mat4d_ortho(double l, double r, double b, double t, double n, double f)
 {
   mat4d m = {0};
-  double rl = (r - l), tb = (t - b), fn = (f - n);
-  m[0] = 2 / rl;
-  m[5] = 2 / tb;
-  m[10] = -2 / fn;
-  m[12] = -(r + l) / rl;
-  m[13] = -(t + b) / tb;
-  m[14] = -(f + n) / fn;
+  m[0] = 2 / (r - l);
+  m[3] = -(r + l) / (r - l);
+  m[5] = 2 / (t - b);
+  m[7] = -(t + b) / (t - b);
+  m[10] = -2 / (f - n);
+  m[11] = -(f + n) / (f - n);
   m[15] = 1;
   return m;
 }
 
 mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up)
 {
-  mat4d m = {0};
   vec4d x, y, z;
 
   if (vec4d_equal(eye, center)) {
@@ -203,21 +200,11 @@ mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up)
   x = vec4d_normalize(vec4d_cross_product(up, z));
   y = vec4d_normalize(vec4d_cross_product(z, x));
 
-  m[0] = x[0];
-  m[1] = y[0];
-  m[2] = z[0];
-  m[4] = x[1];
-  m[5] = y[1];
-  m[6] = z[1];
-  m[8] = x[2];
-  m[9] = y[2];
-  m[10] = z[2];
-  m[12] = -vec4d_dot_product(x, eye);
-  m[13] = -vec4d_dot_product(y, eye);
-  m[14] = -vec4d_dot_product(z, eye);
-  m[15] = 1;
+  x[3] = -vec4d_dot_product(x, eye);
+  y[3] = -vec4d_dot_product(y, eye);
+  z[3] = -vec4d_dot_product(z, eye);
 
-  return m;
+  return mat4d_from_vec4d(x, y, z, (vec4d){0,0,0,1});
 }
 
 mat4f mat4d_to_mat4f(mat4d m)
