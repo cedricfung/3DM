@@ -38,6 +38,38 @@
 
 #define M_PHI 1.618033988749895  //((1 + sqrt(5)) / 2)
 
+static void texcoords_overlap_fix(poly_t *poly, int i1, int i2)
+{
+  float *ts = poly->texcoords;
+  float *vs = poly->vertices;
+  int *is = poly->indices;
+  int vi1 = is[i1], vi2= is[i2];
+  if (fabs(ts[vi1*2] - ts[vi2*2]) > 0.64) {
+    poly->t_len += 2;
+    poly->v_len += 3;
+    if (poly->t_len > poly->t_cap) {
+      int inc = (64 + poly->t_len / 2) / 64;
+      poly->t_cap = (poly->t_cap == 0 ? poly->t_len : poly->t_cap) + inc * 2;
+      poly->v_cap = (poly->v_cap == 0 ? poly->v_len : poly->v_cap) + inc * 3;
+      ts = realloc(ts, poly->t_cap * sizeof(float));
+      vs = realloc(vs, poly->v_cap * sizeof(float));
+      poly->texcoords = ts;
+      poly->vertices = vs;
+    }
+    if (ts[vi1*2] > ts[vi2*2] ) {
+      is[i1] = poly->t_len / 2 - 1;
+      memmove(vs+(is[i1]*3), vs+(vi1*3), 3*sizeof(float));
+      ts[is[i1]*2] = ts[vi1*2] - 1.0f;
+      ts[is[i1]*2+1] = ts[vi1*2+1];
+    } else {
+      is[i2] = poly->t_len / 2 - 1;
+      memmove(vs+(is[i2]*3), vs+(vi2*3), 3*sizeof(float));
+      ts[is[i2]*2] = ts[vi2*2] - 1.0f;
+      ts[is[i2]*2+1] = ts[vi2*2+1];
+    }
+  }
+}
+
 static bool texcoords_calculate(poly_t *poly)
 {
   float x, y, z;
@@ -55,6 +87,11 @@ static bool texcoords_calculate(poly_t *poly)
     poly->texcoords[2*i+1] = (1.0f - z) * 0.5f;
   }
 
+  for (int i = 0; i < poly->i_len; i += 3) {
+    texcoords_overlap_fix(poly, i, i+1);
+    texcoords_overlap_fix(poly, i, i+2);
+    texcoords_overlap_fix(poly, i+1, i+2);
+  }
   return true;
 }
 

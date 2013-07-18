@@ -47,6 +47,8 @@ typedef struct {
   int v_len; // length of vertices
   int t_len; // length of texcoords
   int i_len; // length of indices
+  int v_cap;
+  int t_cap;
 } poly_t;
 
 poly_t *poly_create(enum poly_type type, int n);
