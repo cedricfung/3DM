@@ -43,7 +43,7 @@ typedef double mat4d __attribute__((vector_size(128)));
 
 #define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
 
-#define vector_ptr(type,v) ((type *)&(v))
+#define vector_ptr(type,v) ((type *)&((v)[0]))
 
 #define vector_print(v,n) do { \
   for (int i = 0; i < n; i++) { \
