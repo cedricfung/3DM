@@ -38,7 +38,7 @@
 
 #define M_PHI 1.618033988749895  //((1 + sqrt(5)) / 2)
 
-static void texcoords_overlap_fix(poly_t *poly, int i1, int i2)
+static bool texcoords_overlap_fix(poly_t *poly, int i1, int i2)
 {
   float *ts = poly->texcoords;
   float *vs = poly->vertices;
@@ -52,8 +52,10 @@ static void texcoords_overlap_fix(poly_t *poly, int i1, int i2)
       poly->t_cap = (poly->t_cap == 0 ? poly->t_len : poly->t_cap) + inc * 2;
       poly->v_cap = (poly->v_cap == 0 ? poly->v_len : poly->v_cap) + inc * 3;
       ts = realloc(ts, poly->t_cap * sizeof(float));
-      vs = realloc(vs, poly->v_cap * sizeof(float));
+      if (ts == NULL) { return false; }
       poly->texcoords = ts;
+      vs = realloc(vs, poly->v_cap * sizeof(float));
+      if (vs == NULL) { return false; }
       poly->vertices = vs;
     }
     if (ts[vi1*2] > ts[vi2*2] ) {
@@ -68,6 +70,8 @@ static void texcoords_overlap_fix(poly_t *poly, int i1, int i2)
       ts[is[i2]*2+1] = ts[vi2*2+1];
     }
   }
+
+  return true;
 }
 
 static bool texcoords_calculate(poly_t *poly)
@@ -88,9 +92,11 @@ static bool texcoords_calculate(poly_t *poly)
   }
 
   for (int i = 0; i < poly->i_len; i += 3) {
-    texcoords_overlap_fix(poly, i, i+1);
-    texcoords_overlap_fix(poly, i, i+2);
-    texcoords_overlap_fix(poly, i+1, i+2);
+    if (!texcoords_overlap_fix(poly, i, i+1) ||
+        !texcoords_overlap_fix(poly, i, i+2) ||
+        !texcoords_overlap_fix(poly, i+1, i+2)) {
+      return false;
+    }
   }
   return true;
 }
@@ -101,10 +107,11 @@ static bool icosahedron_recur(poly_t *poly)
   int i1, i2, i3, i12, i23, i31;
   int vdi = poly->v_len - 1, idi = poly->i_len - 1;
   int *indices = realloc(poly->indices, (poly->i_len + poly->i_len * 4) * sizeof(int));
+  if (indices == NULL) { return false; }
+  poly->indices = indices;
   float *vertices = realloc(poly->vertices, (poly->v_len + poly->i_len * 3) * sizeof(float));
-  if (indices == NULL || vertices == NULL) {
-    return false;
-  }
+  if (vertices == NULL) { return false; }
+  poly->vertices = vertices;
 
   for (int i = 0; i < poly->i_len; i += 3) {
     i1 = indices[i]; i2 = indices[i+1]; i3 = indices[i+2];
@@ -123,8 +130,6 @@ static bool icosahedron_recur(poly_t *poly)
     indices[++idi] = i12; indices[++idi] = i23; indices[++idi] = i31;
   }
 
-  poly->vertices = vertices;
-  poly->indices = indices;
   poly->v_len = poly->v_len + poly->i_len * 3;
   poly->i_len = poly->i_len + poly->i_len * 4;
   printf("VERTICES: %d, \tTRIANGLES: %d\n", poly->v_len / 3, poly->i_len / 3);

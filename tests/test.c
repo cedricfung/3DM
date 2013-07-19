@@ -5,6 +5,7 @@
 #include <time.h>
 #include <assert.h>
 #include "3dm.h"
+#include "poly.h"
 
 #define assert_vec4d_equal(u, v) do { \
   if (!vec4d_equal(u, v)) { \
@@ -226,11 +227,23 @@ void test_mat4()
   test_end("test_mat4");
 }
 
+void test_poly()
+{
+  test_begin("test_poly");
+  poly_t *poly = poly_create(POLY_ICOSAHEDRON, 64*64);
+  assert(poly == NULL);
+  poly = poly_create(POLY_ICOSAHEDRON, 8);
+  assert(poly != NULL);
+  poly_destroy(poly);
+  test_end("test_poly");
+}
+
 int main(int argc, const char *argv[])
 {
   test_vector();
   test_equal();
   test_vec4();
   test_mat4();
+  test_poly();
   return 0;
 }

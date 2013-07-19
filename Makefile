@@ -1,3 +1,3 @@
 all:
-	cc -std=c99 -march=native -Wall -Wno-psabi -lm -o test -Iinclude src/3dm.c tests/test.c
+	cc -std=c99 -g -march=native -Wall -Wno-psabi -lm -Iinclude -o test src/*.c tests/*.c
 	./test
