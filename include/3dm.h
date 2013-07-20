@@ -36,14 +36,23 @@
 extern "C" {
 #endif
 
+#ifdef __clang__
+typedef float vec4f __attribute__((ext_vector_type(4)));
+typedef float mat4f __attribute__((ext_vector_type(16)));
+typedef double vec4d __attribute__((ext_vector_type(4)));
+typedef double mat4d __attribute__((ext_vector_type(16)));
+#define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
+#define vector_shuffle __builtin_shufflevector
+#else
 typedef float vec4f __attribute__((vector_size(16)));
 typedef float mat4f __attribute__((vector_size(64)));
 typedef double vec4d __attribute__((vector_size(32)));
 typedef double mat4d __attribute__((vector_size(128)));
-
 #define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
+#define vector_shuffle __builtin_shuffle
+#endif
 
-#define vector_ptr(type,v) ((type *)&((v)[0]))
+#define vector_ptr(type,v) ({__typeof__ (v) _v = (v); (type*)&_v;})
 
 #define vector_print(v,n) do { \
   for (int i = 0; i < n; i++) { \
@@ -72,7 +81,7 @@ mat4d vec4d_tensor_product(vec4d u, vec4d v);
 
 bool vec4d_equal(vec4d u, vec4d v);
 
-mat4d mat4d_identity();
+mat4d mat4d_identity(void);
 
 vec4d mat4d_row(mat4d m, int r);
 

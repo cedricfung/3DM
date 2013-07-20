@@ -76,7 +76,7 @@ bool vec4d_equal(vec4d u, vec4d v)
   return e;
 }
 
-mat4d mat4d_identity()
+mat4d mat4d_identity(void)
 {
   return (mat4d){1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 }
@@ -104,7 +104,7 @@ mat4d mat4d_from_vec4d(vec4d r0, vec4d r1, vec4d r2, vec4d r3)
 mat4d mat4d_transpose(mat4d m)
 {
   vector(long, 16) mask = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
-  return __builtin_shuffle(m, mask);
+  return vector_shuffle(m, mask);
 }
 
 mat4d mat4d_multiply(mat4d m, mat4d n)
