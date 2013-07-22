@@ -137,7 +137,7 @@ static bool icosahedron_recur(poly_t *poly)
   return true;
 }
 
-static poly_t *icosahedron_create(int n)
+static poly_t *icosahedron_create(poly_t *poly, int n)
 {
   const float icosahedron_vertices[36] = {
     // [(0,+/-1, +/-phi), (+/-1, +/-phi, 0), (+/-phi, 0, +/-1)]
@@ -152,18 +152,10 @@ static poly_t *icosahedron_create(int n)
     4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7, 9, 8, 1,
   };
   const float radius = vec4d_length((vec4d){1, M_PHI});
-  int ret = 0;
-
-  poly_t *poly = calloc(1, sizeof(poly_t));
-  if (poly == NULL) {
-    return NULL;
-  }
-  poly->type = POLY_ICOSAHEDRON;
 
   poly->vertices = malloc(sizeof(icosahedron_vertices));
   if (poly->vertices == NULL) {
-    ret = -1;
-    goto end;
+    return NULL;
   }
   poly->v_len = sizeof(icosahedron_vertices) / sizeof(float);
   memcpy(poly->vertices, icosahedron_vertices, sizeof(icosahedron_vertices));
@@ -173,40 +165,131 @@ static poly_t *icosahedron_create(int n)
 
   poly->indices = malloc(sizeof(icosahedron_indices));
   if (poly->indices == NULL) {
-    ret = -1;
-    goto end;
+    return NULL;
   }
   poly->i_len = sizeof(icosahedron_indices) / sizeof(int);
   memcpy(poly->indices, icosahedron_indices, sizeof(icosahedron_indices));
 
-  for (int i = 1; i < n; i++) {
+  for (int i = 0; i < n; i++) {
     if (!icosahedron_recur(poly)) {
-      ret = -1;
-      goto end;
+      return NULL;
     }
   }
 
   if (!texcoords_calculate(poly)) {
-    ret = -1;
-    goto end;
-  }
-
-end:
-  if (ret != 0) {
-    poly_destroy(poly);
     return NULL;
   }
+
+  return poly;
+}
+
+static bool cube_recur(poly_t *poly)
+{
+  vec4d v1, v2, v3, v4, v12, v34;
+  int i1, i2, i3, i4, i12, i34;
+  int vdi = poly->v_len - 1, idi = poly->i_len - 1;
+  int iln = poly->i_len + (poly->i_len - 12);
+  int vln = poly->v_len + (poly->i_len - 12);
+  int *indices = realloc(poly->indices, iln * sizeof(int));
+  if (indices == NULL) { return false; }
+  poly->indices = indices;
+  float *vertices = realloc(poly->vertices, vln * sizeof(float));
+  if (vertices == NULL) { return false; }
+  poly->vertices = vertices;
+
+  for (int i = 12; i < poly->i_len; i += 6) {
+    i1 = indices[i]; i2 = indices[i+1]; i3 = indices[i+3]; i4 = indices[i+4];
+    v1 = (vec4d){vertices[3*i1], vertices[3*i1+1], vertices[3*i1+2]};
+    v2 = (vec4d){vertices[3*i2], vertices[3*i2+1], vertices[3*i2+2]};
+    v3 = (vec4d){vertices[3*i3], vertices[3*i3+1], vertices[3*i3+2]};
+    v4 = (vec4d){vertices[3*i4], vertices[3*i4+1], vertices[3*i4+2]};
+    v12 = vec4d_normalize((vec4d){v1[0], v1[1]} + (vec4d){v2[0], v2[1]}) + (vec4d){0, 0, v1[2]};
+    v34 = vec4d_normalize((vec4d){v3[0], v3[1]} + (vec4d){v4[0], v4[1]}) + (vec4d){0, 0, v3[2]};
+    vertices[++vdi] = v12[0]; vertices[++vdi] = v12[1]; vertices[++vdi] = v12[2]; i12 = (vdi + 1) / 3 - 1;
+    vertices[++vdi] = v34[0]; vertices[++vdi] = v34[1]; vertices[++vdi] = v34[2]; i34 = (vdi + 1) / 3 - 1;
+    indices[i] = i1; indices[i+1] = i12; indices[i+2] = i4;
+    indices[i+3] = i34; indices[i+4] = i4; indices[i+5] = i12;
+    indices[++idi] = i12; indices[++idi] = i2; indices[++idi] = i34;
+    indices[++idi] = i3; indices[++idi] = i34; indices[++idi] = i2;
+  }
+
+  poly->i_len = iln;
+  poly->v_len = vln;
+  printf("VERTICES: %d, \tTRIANGLES: %d\n", poly->v_len / 3, poly->i_len / 3);
+
+  return true;
+}
+
+static poly_t *cube_create(poly_t *poly, int n)
+{
+  const float cube_vertices[24] = {
+    -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1, -1,
+    -1, -1, 1,  -1, 1, 1,  1, -1, 1,  1, 1, 1
+  };
+  const int cube_indices[36] = {
+    2, 0, 1, 1, 3, 2,
+    4, 6, 5, 7, 5, 6,
+    0, 2, 4, 6, 4, 2,
+    3, 1, 7, 5, 7, 1,
+    2, 3, 6, 7, 6, 3,
+    1, 0, 5, 4, 5, 0
+  };
+  const float radius = vec4d_length((vec4d){1, 1});
+
+  poly->vertices = malloc(sizeof(cube_vertices));
+  if (poly->vertices == NULL) {
+    return NULL;
+  }
+  poly->v_len = sizeof(cube_vertices) / sizeof(float);
+  memcpy(poly->vertices, cube_vertices, sizeof(cube_vertices));
+  for (int i = 0; i < poly->v_len; i++) {
+    poly->vertices[i] /= radius;
+  }
+
+  poly->indices = malloc(sizeof(cube_indices));
+  if (poly->indices == NULL) {
+    return NULL;
+  }
+  poly->i_len = sizeof(cube_indices) / sizeof(int);
+  memcpy(poly->indices, cube_indices, sizeof(cube_indices));
+
+  for (int i = 0; i < n; i++) {
+    if (!cube_recur(poly)) {
+      return NULL;
+    }
+  }
+
+  if (!texcoords_calculate(poly)) {
+    return NULL;
+  }
+
   return poly;
 }
 
 poly_t *poly_create(enum poly_type type, int n)
 {
+  poly_t *(*create)(poly_t *, int) = NULL;
+  poly_t *poly = calloc(1, sizeof(poly_t));
+  if (poly == NULL) {
+    return NULL;
+  }
+  poly->type = type;
+
   switch (type) {
     case POLY_ICOSAHEDRON:
-      return icosahedron_create(n);
+      create = icosahedron_create;
+      break;
+    case POLY_CUBE:
     default:
-      return NULL;
+      create = cube_create;
   }
+
+  if (create == NULL || create(poly, n) == NULL) {
+    poly_destroy(poly);
+    return NULL;
+  }
+
+  return poly;
 }
 
 void poly_destroy(poly_t *poly)

@@ -36,6 +36,7 @@ extern "C" {
 #endif
 
 enum poly_type {
+  POLY_CUBE,
   POLY_ICOSAHEDRON,
 };
 

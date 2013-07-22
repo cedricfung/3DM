@@ -227,15 +227,27 @@ void test_mat4()
   test_end("test_mat4");
 }
 
-void test_poly()
+void test_poly_icosahedron()
 {
-  test_begin("test_poly");
+  test_begin("test_poly_icosahedron");
   poly_t *poly = poly_create(POLY_ICOSAHEDRON, 64*64);
   assert(poly == NULL);
-  poly = poly_create(POLY_ICOSAHEDRON, 8);
+  poly = poly_create(POLY_ICOSAHEDRON, 7);
   assert(poly != NULL);
   poly_destroy(poly);
-  test_end("test_poly");
+  test_end("test_poly_icosahedron");
+}
+
+void test_poly_cube()
+{
+  test_begin("test_poly_cube");
+  poly_t *poly = poly_create(POLY_CUBE, 0);
+  assert(poly != NULL);
+  poly_destroy(poly);
+  poly = poly_create(POLY_CUBE, 7);
+  assert(poly != NULL);
+  poly_destroy(poly);
+  test_end("test_poly_cube");
 }
 
 int main(int argc, const char *argv[])
@@ -244,6 +256,7 @@ int main(int argc, const char *argv[])
   test_equal();
   test_vec4();
   test_mat4();
-  test_poly();
+  test_poly_icosahedron();
+  test_poly_cube();
   return 0;
 }
