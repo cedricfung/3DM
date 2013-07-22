@@ -106,10 +106,11 @@ static bool icosahedron_recur(poly_t *poly)
   vec4d v1, v2, v3, v12, v23, v31;
   int i1, i2, i3, i12, i23, i31;
   int vdi = poly->v_len - 1, idi = poly->i_len - 1;
-  int *indices = realloc(poly->indices, (poly->i_len + poly->i_len * 4) * sizeof(int));
+  int vln = poly->i_len * 4, iln = poly->i_len * 4;
+  int *indices = realloc(poly->indices, iln * sizeof(int));
   if (indices == NULL) { return false; }
   poly->indices = indices;
-  float *vertices = realloc(poly->vertices, (poly->v_len + poly->i_len * 3) * sizeof(float));
+  float *vertices = realloc(poly->vertices, vln * sizeof(float));
   if (vertices == NULL) { return false; }
   poly->vertices = vertices;
 
@@ -124,14 +125,14 @@ static bool icosahedron_recur(poly_t *poly)
     vertices[++vdi] = v12[0]; vertices[++vdi] = v12[1]; vertices[++vdi] = v12[2]; i12 = (vdi + 1) / 3 - 1;
     vertices[++vdi] = v23[0]; vertices[++vdi] = v23[1]; vertices[++vdi] = v23[2]; i23 = (vdi + 1) / 3 - 1;
     vertices[++vdi] = v31[0]; vertices[++vdi] = v31[1]; vertices[++vdi] = v31[2]; i31 = (vdi + 1) / 3 - 1;
-    indices[++idi] = i1; indices[++idi] = i12; indices[++idi] = i31;
+    indices[i] = i1; indices[i+1] = i12; indices[i+2] = i31;
     indices[++idi] = i2; indices[++idi] = i23; indices[++idi] = i12;
     indices[++idi] = i3; indices[++idi] = i31; indices[++idi] = i23;
     indices[++idi] = i12; indices[++idi] = i23; indices[++idi] = i31;
   }
 
-  poly->v_len = poly->v_len + poly->i_len * 3;
-  poly->i_len = poly->i_len + poly->i_len * 4;
+  poly->i_len = iln;
+  poly->v_len = vln;
   printf("VERTICES: %d, \tTRIANGLES: %d\n", poly->v_len / 3, poly->i_len / 3);
 
   return true;
@@ -188,8 +189,7 @@ static bool cube_recur(poly_t *poly)
   vec4d v1, v2, v3, v4, v12, v34;
   int i1, i2, i3, i4, i12, i34;
   int vdi = poly->v_len - 1, idi = poly->i_len - 1;
-  int iln = poly->i_len + (poly->i_len - 12);
-  int vln = poly->v_len + (poly->i_len - 12);
+  int vln = poly->i_len * 2 - 12, iln = poly->i_len * 2 - 12;
   int *indices = realloc(poly->indices, iln * sizeof(int));
   if (indices == NULL) { return false; }
   poly->indices = indices;
