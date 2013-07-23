@@ -31,7 +31,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <math.h>
-#include "3dm.h"
+#include "3dm/3dm.h"
 
 double vec4d_sum(vec4d v)
 {

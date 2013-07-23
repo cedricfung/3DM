@@ -4,8 +4,8 @@
 #include <math.h>
 #include <time.h>
 #include <assert.h>
-#include "3dm.h"
-#include "poly.h"
+#include "3dm/3dm.h"
+#include "3dm/poly.h"
 
 #define assert_vec4d_equal(u, v) do { \
   if (!vec4d_equal(u, v)) { \

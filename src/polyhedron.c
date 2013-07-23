@@ -33,8 +33,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include "3dm.h"
-#include "poly.h"
+#include "3dm/3dm.h"
+#include "3dm/poly.h"
 
 #define M_PHI 1.618033988749895  //((1 + sqrt(5)) / 2)
 
