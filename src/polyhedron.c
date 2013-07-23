@@ -88,7 +88,14 @@ static bool texcoords_calculate(poly_t *poly)
     y = poly->vertices[3*i+1];
     z = poly->vertices[3*i+2];
     poly->texcoords[2*i] = (1.0f + atan2f(y, x) / M_PI) * 0.5f;
-    poly->texcoords[2*i+1] = (1.0f - z) * 0.5f;
+    switch (poly->type) {
+      case POLY_ICOSAHEDRON:
+        poly->texcoords[2*i+1] = (1 - asinf(z) * 2 / M_PI) * 0.5f;
+        break;
+      case POLY_CUBE:
+      default:
+        poly->texcoords[2*i+1] = (1 - z * sqrt(2)) * 0.5f;
+    }
   }
 
   for (int i = 0; i < poly->i_len; i += 3) {
