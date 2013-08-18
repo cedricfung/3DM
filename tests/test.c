@@ -52,6 +52,19 @@ double vv_dot_product = 196;
 double uv_dot_product = 70;
 double vu_dot_product = 70;
 
+vec4d uu_add = {.vex = {2, 4, 6, 8}};
+vec4d uv_add = {.vex = {8, 9, 10, 11}};
+vec4d vv_add = {.vex = {14, 14, 14, 14}};
+vec4d vu_add = {.vex = {8, 9, 10, 11}};
+
+vec4d u1_scale = {.vex = {1, 2, 3, 4}};
+vec4d u2_scale = {.vex = {2, 4, 6, 8}};
+
+vec4d uu_multiply = {.vex = {1, 4, 9, 16}};
+vec4d uv_multiply = {.vex = {7, 14, 21, 28}};
+vec4d vv_multiply = {.vex = {49, 49, 49, 49}};
+vec4d vu_multiply = {.vex = {7, 14, 21, 28}};
+
 mat4d u_cross_matrix = {.vex = {0, -3, 2, 0, 3, 0, -1, 0, -2, 1, 0, 0, 0, 0, 0, 0}};
 mat4d v_cross_matrix = {.vex = {0, -7, 7, 0, 7, 0, -7, 0, -7, 7, 0, 0, 0, 0, 0, 0}};
 
@@ -87,6 +100,16 @@ vec4d mv_multiply = {.vex = {70, 182, 294, 406}};
 mat4d I123_scale = {.vex = {1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1}};
 mat4d I123_translate = {.vex = {1, 0, 0, 1, 0, 1, 0, 2, 0, 0, 1, 3, 0, 0, 0, 1}};
 mat4d I123_scale_123_translate = {.vex = {1, 0, 0, 1, 0, 2, 0, 2, 0, 0, 3, 3, 0, 0, 0, 1}};
+mat4d I001_10_rotate = {.vex = {0.98480775301220802031565426659654,
+  -0.17364817766693033118663436198403, 0, 0,
+    0.17364817766693033118663436198403,
+    0.98480775301220802031565426659654,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+mat4d I001_n10_rotate = {.vex = {0.98480775301220802031565426659654,
+  0.17364817766693033118663436198403, 0, 0,
+    -0.17364817766693033118663436198403,
+    0.98480775301220802031565426659654,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
 
 mat4d r_frustum = {.vex = {0.40000000000000002220446049250313, 0,
   0.20000000000000001110223024625157, 0, 0,
@@ -100,7 +123,6 @@ mat4d r_ortho = {.vex = {0.40000000000000002220446049250313, 0, 0,
   0.20000000000000001110223024625157, 0, 0,
   -0.00100050025012506245934706949896,
   -1.00100050025012499155252498894697, 0, 0, 0, 1}};
-#ifdef __clang__
 mat4d r_look_at = {.vex = {-0.57735026918962584208117050366127,
   0.57735026918962584208117050366127,
   -0.57735026918962584208117050366127,
@@ -112,27 +134,28 @@ mat4d r_look_at = {.vex = {-0.57735026918962584208117050366127,
   0.70710678118654746171500846685376,
   0.70710678118654746171500846685376, 0,
   -1.41421356237309492343001693370752, 0, 0, 0, 1}};
-#else
-mat4d r_look_at = {.vex = {-0.57735026918962573105886804114562,
-  0.57735026918962573105886804114562,
-  -0.57735026918962573105886804114562,
-  0.57735026918962573105886804114562,
-  -0.40824829046386301723003953156876,
-  0.40824829046386301723003953156876,
-  0.81649658092772603446007906313753,
-  -0.81649658092772603446007906313753,
-  0.70710678118654746171500846685376,
-  0.70710678118654746171500846685376, 0,
-  -1.41421356237309492343001693370752, 0, 0, 0, 1}};
-#endif
 
 void test_vector()
 {
   test_begin("test_vector");
-  vector(double, 4) v = {1.0, 2.01, 3.007, 4.5};
-  assert(v[0] == 1.0);
-  assert(v[1] == 2.01);
-  assert(v[3] == 4.5);
+  vector(double, 4) _v = {1.0, 2.01, 3, 4.5};
+  assert(_v[0] == 1.0);
+  assert(_v[1] == 2.01);
+  assert(_v[2] == 3);
+  assert(_v[3] == 4.5);
+
+  assert_vec4d_equal(vector_add(u, u), uu_add);
+  assert_vec4d_equal(vector_add(u, v), uv_add);
+  assert_vec4d_equal(vector_add(v, v), vv_add);
+  assert_vec4d_equal(vector_add(v, u), vu_add);
+
+  assert_vec4d_equal(vector_scale(u, 1), u1_scale);
+  assert_vec4d_equal(vector_scale(u, 2), u2_scale);
+
+  assert_vec4d_equal(vector_multiply(u, u), uu_multiply);
+  assert_vec4d_equal(vector_multiply(u, v), uv_multiply);
+  assert_vec4d_equal(vector_multiply(v, v), vv_multiply);
+  assert_vec4d_equal(vector_multiply(v, u), vu_multiply);
   test_end("test_vector");
 }
 
@@ -230,6 +253,9 @@ void test_mat4()
 
   assert_mat4d_equal(mat4d_translate(mat4d_scale(I, 1, 2, 3), 1, 2, 3), I123_scale_123_translate);
   assert_mat4d_equal(mat4d_translate(mat4d_scale(m, 1, 2, 3), 1, 2, 3), mat4d_multiply(I123_scale_123_translate, m));
+
+  assert_mat4d_equal(mat4d_rotate(I, (vec4d){.vex = {0, 0, 1}}, 10), I001_10_rotate);
+  assert_mat4d_equal(mat4d_rotate(I, (vec4d){.vex = {0, 0, 1}}, -10), I001_n10_rotate);
 
   assert_mat4d_equal(mat4d_frustum(-2, 3, -3, 2, 1, 2000), r_frustum);
   assert_mat4d_equal(mat4d_ortho(-2, 3, -3, 2, 1, 2000), r_ortho);

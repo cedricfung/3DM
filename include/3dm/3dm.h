@@ -45,23 +45,23 @@ typedef union { double ptr[16]; double vex __attribute__((vector_size(128))); } 
 #define vector_shuffle __builtin_shufflevector
 #define vector_scale(v,s) ({ __typeof__ (v) _v; __typeof__ (v) _v2; \
     for (int i = 0; i < sizeof(_v2.ptr) / sizeof(s); i++) { _v2.ptr[i] = s; } \
-    _v.vex = v.vex * _v2.vex; \
+    _v.vex = (v).vex * _v2.vex; \
     _v; })
 #else
 #define vector_shuffle __builtin_shuffle
-#define vector_scale(v,s) ({ __typeof__ (v) _v; _v.vex = v.vex * s; _v; })
+#define vector_scale(v,s) ({ __typeof__ (v) _v; _v.vex = (v).vex * (s); _v; })
 #endif
 
 #define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
-#define vector_add(v1,v2) ({ __typeof__ (v1) _v; _v.vex = v1.vex + v2.vex; _v; })
-#define vector_multiply(v1,v2) ({ __typeof__ (v1) _v; _v.vex = v1.vex * v2.vex; _v; })
+#define vector_add(v1,v2) ({ __typeof__ (v1) _v; _v.vex = (v1).vex + (v2).vex; _v; })
+#define vector_multiply(v1,v2) ({ __typeof__ (v1) _v; _v.vex = (v1).vex * (v2).vex; _v; })
 
 #define vector_print(v,n) do { \
   for (int i = 0; i < n; i++) { \
     if (i % 4 == 3) { \
-      printf("%f\n", (v.ptr)[i]); \
+      printf("%f\n", (v).ptr[i]); \
     } else { \
-      printf("%f\t", (v.ptr)[i]); \
+      printf("%f\t", (v).ptr[i]); \
     } \
   } \
   printf("\n"); \
