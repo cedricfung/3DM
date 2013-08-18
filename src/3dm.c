@@ -35,12 +35,12 @@
 
 double vec4d_sum(vec4d v)
 {
-  return v[0] + v[1] + v[2] + v[3];
+  return v.ptr[0] + v.ptr[1] + v.ptr[2] + v.ptr[3];
 }
 
 double vec4d_dot_product(vec4d u, vec4d v)
 {
-  return vec4d_sum(u * v);
+  return vec4d_sum(vector_multiply(u, v));
 }
 
 double vec4d_length(vec4d v)
@@ -51,12 +51,19 @@ double vec4d_length(vec4d v)
 vec4d vec4d_normalize(vec4d v)
 {
   double l = vec4d_length(v);
-  return l == 0 ? v : v / l;
+  return l == 0 ? v : vector_scale(v, 1.0 / l);
 }
 
 mat4d vec4d_cross_matrix(vec4d v)
 {
-  return (mat4d){0, -v[2], v[1], 0, v[2], 0, -v[0], 0, -v[1], v[0], 0, 0, 0, 0, 0, 0};
+  mat4d m = {.vex = {0}};
+  m.ptr[1] = -v.ptr[2];
+  m.ptr[2] = v.ptr[1];
+  m.ptr[4] = v.ptr[2];
+  m.ptr[6] = -v.ptr[0];
+  m.ptr[8] = -v.ptr[1];
+  m.ptr[9] = v.ptr[0];
+  return m;
 }
 
 vec4d vec4d_cross_product(vec4d u, vec4d v)
@@ -66,53 +73,71 @@ vec4d vec4d_cross_product(vec4d u, vec4d v)
 
 mat4d vec4d_tensor_product(vec4d u, vec4d v)
 {
-  return mat4d_from_vec4d(u[0] * v, u[1] * v, u[2] * v, u[3] * v);
+  return mat4d_from_vec4d(vector_scale(v, u.ptr[0]), vector_scale(v, u.ptr[1]), vector_scale(v, u.ptr[2]), vector_scale(v, u.ptr[3]));
 }
 
 bool vec4d_equal(vec4d u, vec4d v)
 {
   bool e = true;
-  for (int i = 0; i < 4 && (e = (u[i] == v[i])); i++);
+  for (int i = 0; i < 4 && (e = (u.ptr[i] == v.ptr[i])); i++);
   return e;
 }
 
 mat4d mat4d_identity(void)
 {
-  return (mat4d){1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+  mat4d m = {.vex = {0}};
+  m.ptr[0] = 1;
+  m.ptr[5] = 1;
+  m.ptr[10] = 1;
+  m.ptr[15] = 1;
+  return m;
 }
 
 vec4d mat4d_row(mat4d m, int r)
 {
+  vec4d v = {.vex = {0}};
   r = r * 4;
-  return (vec4d){m[r], m[r+1], m[r+2], m[r+3]};
+  v.ptr[0] = m.ptr[r];
+  v.ptr[1] = m.ptr[r+1];
+  v.ptr[2] = m.ptr[r+2];
+  v.ptr[3] = m.ptr[r+3];
+  return v;
 }
 
 vec4d mat4d_column(mat4d m, int c)
 {
-  return (vec4d){m[c], m[c+4], m[c+8], m[c+12]};
+  vec4d v = {.vex = {0}};
+  v.ptr[0] = m.ptr[c];
+  v.ptr[1] = m.ptr[c+4];
+  v.ptr[2] = m.ptr[c+8];
+  v.ptr[3] = m.ptr[c+12];
+  return v;
 }
 
 mat4d mat4d_from_vec4d(vec4d r0, vec4d r1, vec4d r2, vec4d r3)
 {
-  return (mat4d)
-  { r0[0],r0[1],r0[2],r0[3],
-    r1[0],r1[1],r1[2],r1[3],
-    r2[0],r2[1],r2[2],r2[3],
-    r3[0],r3[1],r3[2],r3[3] };
+  mat4d m = {.vex = {0}};
+  for (int i = 0; i < 4; i++) { m.ptr[i] = r0.ptr[i]; }
+  for (int i = 0; i < 4; i++) { m.ptr[i+4] = r1.ptr[i]; }
+  for (int i = 0; i < 4; i++) { m.ptr[i+8] = r2.ptr[i]; }
+  for (int i = 0; i < 4; i++) { m.ptr[i+12] = r3.ptr[i]; }
+  return m;
 }
 
 mat4d mat4d_transpose(mat4d m)
 {
+  mat4d mt = {.vex = {0}};
   vector(long, 16) mask = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
-  return vector_shuffle(m, mask);
+  mt.vex = vector_shuffle(m.vex, mask);
+  return mt;
 }
 
 mat4d mat4d_multiply(mat4d m, mat4d n)
 {
-  mat4d r = {};
+  mat4d r = {.vex = {0}};
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
-      r[i * 4 + j] = vec4d_dot_product(mat4d_row(m, i), mat4d_column(n, j));
+      r.ptr[i * 4 + j] = vec4d_dot_product(mat4d_row(m, i), mat4d_column(n, j));
     }
   }
   return r;
@@ -120,29 +145,29 @@ mat4d mat4d_multiply(mat4d m, mat4d n)
 
 vec4d mat4d_multiply_vec4d(mat4d m, vec4d v)
 {
-  return (vec4d){
-    vec4d_dot_product(mat4d_row(m, 0), v),
-      vec4d_dot_product(mat4d_row(m, 1), v),
-      vec4d_dot_product(mat4d_row(m, 2), v),
-      vec4d_dot_product(mat4d_row(m, 3), v)
-  };
+  vec4d vr = {.vex = {0}};
+  vr.ptr[0] = vec4d_dot_product(mat4d_row(m, 0), v);
+  vr.ptr[1] = vec4d_dot_product(mat4d_row(m, 1), v);
+  vr.ptr[2] = vec4d_dot_product(mat4d_row(m, 2), v);
+  vr.ptr[3] = vec4d_dot_product(mat4d_row(m, 3), v);
+  return vr;
 }
 
 mat4d mat4d_scale(mat4d m, double x, double y, double z)
 {
   mat4d s = mat4d_identity();
-  s[0] = x;
-  s[5] = y;
-  s[10] = z;
+  s.ptr[0] = x;
+  s.ptr[5] = y;
+  s.ptr[10] = z;
   return mat4d_multiply(s, m);
 }
 
 mat4d mat4d_translate(mat4d m, double x, double y, double z)
 {
   mat4d t = mat4d_identity();
-  t[3] = x;
-  t[7] = y;
-  t[11] = z;
+  t.ptr[3] = x;
+  t.ptr[7] = y;
+  t.ptr[11] = z;
   return mat4d_multiply(t, m);
 }
 
@@ -151,21 +176,24 @@ mat4d mat4d_rotate(mat4d m, vec4d axis, double degree)
   double rad = degree * M_PI / 180;
   double s = sin(rad), c = cos(rad);
   vec4d u = vec4d_normalize(axis);
-  mat4d rotate = c * mat4d_identity() + s * vec4d_cross_matrix(axis) + (1 - c) * vec4d_tensor_product(u, u);
-  rotate[15] = 1;
+  mat4d m1 = vector_scale(mat4d_identity(), c);
+  mat4d m2 = vector_scale(vec4d_cross_matrix(axis), s);
+  mat4d m3 = vector_scale(vec4d_tensor_product(u, u), 1 - c);
+  mat4d rotate = vector_add(vector_add(m1, m2), m3);
+  rotate.ptr[15] = 1;
   return mat4d_multiply(rotate, m);
 }
 
 mat4d mat4d_frustum(double l, double r, double b, double t, double n, double f)
 {
-  mat4d m = {0};
-  m[0] = (2 * n) / (r - l);
-  m[2] = (r + l) / (r - l);
-  m[5] = (2 * n) / (t - b);
-  m[6] = (t + b) / (t - b);
-  m[10] = -(f + n) / (f - n);
-  m[11] = -(2 * f * n) / (f - n);
-  m[14] = -1;
+  mat4d m = {.vex = {0}};
+  m.ptr[0] = (2 * n) / (r - l);
+  m.ptr[2] = (r + l) / (r - l);
+  m.ptr[5] = (2 * n) / (t - b);
+  m.ptr[6] = (t + b) / (t - b);
+  m.ptr[10] = -(f + n) / (f - n);
+  m.ptr[11] = -(2 * f * n) / (f - n);
+  m.ptr[14] = -1;
   return m;
 }
 
@@ -178,41 +206,42 @@ mat4d mat4d_perspective(double fov, double aspect, double n, double f)
 
 mat4d mat4d_ortho(double l, double r, double b, double t, double n, double f)
 {
-  mat4d m = {0};
-  m[0] = 2 / (r - l);
-  m[3] = -(r + l) / (r - l);
-  m[5] = 2 / (t - b);
-  m[7] = -(t + b) / (t - b);
-  m[10] = -2 / (f - n);
-  m[11] = -(f + n) / (f - n);
-  m[15] = 1;
+  mat4d m = {.vex = {0}};
+  m.ptr[0] = 2 / (r - l);
+  m.ptr[3] = -(r + l) / (r - l);
+  m.ptr[5] = 2 / (t - b);
+  m.ptr[7] = -(t + b) / (t - b);
+  m.ptr[10] = -2 / (f - n);
+  m.ptr[11] = -(f + n) / (f - n);
+  m.ptr[15] = 1;
   return m;
 }
 
 mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up)
 {
-  vec4d x, y, z;
+  vec4d x = {.vex = {0}}, y = {.vex = {0}}, z = {.vex = {0}}, w = {.vex = {0}};
 
   if (vec4d_equal(eye, center)) {
     return mat4d_identity();
   }
 
-  z = vec4d_normalize(eye - center);
+  z = vec4d_normalize(vector_add(eye, vector_scale(center, -1)));
   x = vec4d_normalize(vec4d_cross_product(up, z));
   y = vec4d_normalize(vec4d_cross_product(z, x));
 
-  x[3] = -vec4d_dot_product(x, eye);
-  y[3] = -vec4d_dot_product(y, eye);
-  z[3] = -vec4d_dot_product(z, eye);
+  x.ptr[3] = -vec4d_dot_product(x, eye);
+  y.ptr[3] = -vec4d_dot_product(y, eye);
+  z.ptr[3] = -vec4d_dot_product(z, eye);
+  w.ptr[3] = 1;
 
-  return mat4d_from_vec4d(x, y, z, (vec4d){0,0,0,1});
+  return mat4d_from_vec4d(x, y, z, w);
 }
 
 mat4f mat4d_to_mat4f(mat4d m)
 {
-  mat4f f = {0};
+  mat4f f = {.vex = {0}};
   for (int i = 0; i < 16; i++) {
-    f[i] = (float)m[i];
+    f.ptr[i] = (float)m.ptr[i];
   }
   return f;
 }
@@ -220,6 +249,6 @@ mat4f mat4d_to_mat4f(mat4d m)
 bool mat4d_equal(mat4d m, mat4d n)
 {
   bool e = true;
-  for (int i = 0; i < 16 && (e = (m[i] == n[i])); i++);
+  for (int i = 0; i < 16 && (e = (m.ptr[i] == n.ptr[i])); i++);
   return e;
 }
