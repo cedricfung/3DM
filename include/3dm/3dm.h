@@ -107,7 +107,9 @@ mat4d mat4d_frustum(double l, double r, double b, double t, double n, double f);
 
 mat4d mat4d_perspective(double fov, double aspect, double n, double f);
 
-mat4d mat4d_ortho(double l, double r, double b, double t, double n, double f);
+mat4d mat4d_frustum_ortho(double l, double r, double b, double t, double n, double f);
+
+mat4d mat4d_ortho(double fov, double aspect, double n, double f);
 
 mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up);
 

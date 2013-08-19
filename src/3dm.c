@@ -204,7 +204,7 @@ mat4d mat4d_perspective(double fov, double aspect, double n, double f)
   return mat4d_frustum(-r, r, -t, t, n, f);
 }
 
-mat4d mat4d_ortho(double l, double r, double b, double t, double n, double f)
+mat4d mat4d_frustum_ortho(double l, double r, double b, double t, double n, double f)
 {
   mat4d m = {.vex = {0}};
   m.ptr[0] = 2 / (r - l);
@@ -215,6 +215,13 @@ mat4d mat4d_ortho(double l, double r, double b, double t, double n, double f)
   m.ptr[11] = -(f + n) / (f - n);
   m.ptr[15] = 1;
   return m;
+}
+
+mat4d mat4d_ortho(double fov, double aspect, double n, double f)
+{
+  double t = n * tan(fov * M_PI / 360);
+  double r = t * aspect;
+  return mat4d_frustum_ortho(-r, r, -t, t, n, f);
 }
 
 mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up)
