@@ -123,15 +123,15 @@ static bool icosahedron_recur(poly_t *poly)
 
   for (int i = 0; i < poly->i_len; i += 3) {
     i1 = indices[i]; i2 = indices[i+1]; i3 = indices[i+2];
-    v1 = (vec4d){vertices[3*i1], vertices[3*i1+1], vertices[3*i1+2]};
-    v2 = (vec4d){vertices[3*i2], vertices[3*i2+1], vertices[3*i2+2]};
-    v3 = (vec4d){vertices[3*i3], vertices[3*i3+1], vertices[3*i3+2]};
-    v12 = vec4d_normalize(v1 + v2);
-    v23 = vec4d_normalize(v2 + v3);
-    v31 = vec4d_normalize(v3 + v1);
-    vertices[++vdi] = v12[0]; vertices[++vdi] = v12[1]; vertices[++vdi] = v12[2]; i12 = (vdi + 1) / 3 - 1;
-    vertices[++vdi] = v23[0]; vertices[++vdi] = v23[1]; vertices[++vdi] = v23[2]; i23 = (vdi + 1) / 3 - 1;
-    vertices[++vdi] = v31[0]; vertices[++vdi] = v31[1]; vertices[++vdi] = v31[2]; i31 = (vdi + 1) / 3 - 1;
+    v1.vex = (vector(double, 4)){vertices[3*i1], vertices[3*i1+1], vertices[3*i1+2]};
+    v2.vex = (vector(double, 4)){vertices[3*i2], vertices[3*i2+1], vertices[3*i2+2]};
+    v3.vex = (vector(double, 4)){vertices[3*i3], vertices[3*i3+1], vertices[3*i3+2]};
+    v12 = vec4d_normalize(vector_add(v1, v2));
+    v23 = vec4d_normalize(vector_add(v2, v3));
+    v31 = vec4d_normalize(vector_add(v3, v1));
+    vertices[++vdi] = v12.ptr[0]; vertices[++vdi] = v12.ptr[1]; vertices[++vdi] = v12.ptr[2]; i12 = (vdi + 1) / 3 - 1;
+    vertices[++vdi] = v23.ptr[0]; vertices[++vdi] = v23.ptr[1]; vertices[++vdi] = v23.ptr[2]; i23 = (vdi + 1) / 3 - 1;
+    vertices[++vdi] = v31.ptr[0]; vertices[++vdi] = v31.ptr[1]; vertices[++vdi] = v31.ptr[2]; i31 = (vdi + 1) / 3 - 1;
     indices[i] = i1; indices[i+1] = i12; indices[i+2] = i31;
     indices[++idi] = i2; indices[++idi] = i23; indices[++idi] = i12;
     indices[++idi] = i3; indices[++idi] = i31; indices[++idi] = i23;
@@ -159,7 +159,8 @@ static poly_t *icosahedron_create(poly_t *poly, int n)
     3, 9, 4, 3, 4, 2, 3, 2, 6, 3, 6, 8, 3, 8, 9,
     4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7, 9, 8, 1,
   };
-  const float radius = vec4d_length((vec4d){1, M_PHI});
+  const vec4d _R = { .vex = (vector(double,4)){1, M_PHI} };
+  const float radius = vec4d_length(_R);
 
   poly->vertices = malloc(sizeof(icosahedron_vertices));
   if (poly->vertices == NULL) {
@@ -206,14 +207,16 @@ static bool cube_recur(poly_t *poly)
 
   for (int i = 12; i < poly->i_len; i += 6) {
     i1 = indices[i]; i2 = indices[i+1]; i3 = indices[i+3]; i4 = indices[i+4];
-    v1 = (vec4d){vertices[3*i1], vertices[3*i1+1], vertices[3*i1+2]};
-    v2 = (vec4d){vertices[3*i2], vertices[3*i2+1], vertices[3*i2+2]};
-    v3 = (vec4d){vertices[3*i3], vertices[3*i3+1], vertices[3*i3+2]};
-    v4 = (vec4d){vertices[3*i4], vertices[3*i4+1], vertices[3*i4+2]};
-    v12 = vec4d_normalize((vec4d){v1[0], v1[1]} + (vec4d){v2[0], v2[1]}) + (vec4d){0, 0, v1[2]};
-    v34 = vec4d_normalize((vec4d){v3[0], v3[1]} + (vec4d){v4[0], v4[1]}) + (vec4d){0, 0, v3[2]};
-    vertices[++vdi] = v12[0]; vertices[++vdi] = v12[1]; vertices[++vdi] = v12[2]; i12 = (vdi + 1) / 3 - 1;
-    vertices[++vdi] = v34[0]; vertices[++vdi] = v34[1]; vertices[++vdi] = v34[2]; i34 = (vdi + 1) / 3 - 1;
+    v1.vex = (vector(double, 4)){vertices[3*i1], vertices[3*i1+1], vertices[3*i1+2]};
+    v2.vex = (vector(double, 4)){vertices[3*i2], vertices[3*i2+1], vertices[3*i2+2]};
+    v3.vex = (vector(double, 4)){vertices[3*i3], vertices[3*i3+1], vertices[3*i3+2]};
+    v4.vex = (vector(double, 4)){vertices[3*i4], vertices[3*i4+1], vertices[3*i4+2]};
+    v12 = vec4d_normalize((vec4d){.vex = {v1.ptr[0] + v2.ptr[0], v1.ptr[1] + v2.ptr[1]}});
+    v12 = vector_add(v12, ((vec4d){.vex = {0, 0, v1.ptr[2]}}));
+    v34 = vec4d_normalize((vec4d){.vex = {v3.ptr[0] + v4.ptr[0], v3.ptr[1] + v4.ptr[1]}});
+    v34 = vector_add(v34, ((vec4d){.vex = {0, 0, v3.ptr[2]}}));
+    vertices[++vdi] = v12.ptr[0]; vertices[++vdi] = v12.ptr[1]; vertices[++vdi] = v12.ptr[2]; i12 = (vdi + 1) / 3 - 1;
+    vertices[++vdi] = v34.ptr[0]; vertices[++vdi] = v34.ptr[1]; vertices[++vdi] = v34.ptr[2]; i34 = (vdi + 1) / 3 - 1;
     indices[i] = i1; indices[i+1] = i12; indices[i+2] = i4;
     indices[i+3] = i34; indices[i+4] = i4; indices[i+5] = i12;
     indices[++idi] = i12; indices[++idi] = i2; indices[++idi] = i34;
@@ -241,7 +244,8 @@ static poly_t *cube_create(poly_t *poly, int n)
     2, 3, 6, 7, 6, 3,
     1, 0, 5, 4, 5, 0
   };
-  const float radius = vec4d_length((vec4d){1, 1});
+  const vec4d _R = { .vex = (vector(double,4)){1, 1} };
+  const float radius = vec4d_length(_R);
 
   poly->vertices = malloc(sizeof(cube_vertices));
   if (poly->vertices == NULL) {

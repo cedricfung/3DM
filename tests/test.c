@@ -37,12 +37,12 @@
   printf("TEST END: %s\t TIME(us): %ld\n\n", name, us); \
 } while (0)
 
-vec4d u = {1, 2, 3, 4};
-vec4d v = {7, 7, 7, 7};
-vec4d z = {0, 0, 0, 0};
-mat4d m = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-mat4d n = {7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
-mat4d I = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+vec4d u = {.vex = {1, 2, 3, 4}};
+vec4d v = {.vex = {7, 7, 7, 7}};
+vec4d z = {.vex = {0, 0, 0, 0}};
+mat4d m = {.vex = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}};
+mat4d n = {.vex = {7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}};
+mat4d I = {.vex = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
 
 double u_sum = 10;
 double v_sum = 28;
@@ -52,75 +52,110 @@ double vv_dot_product = 196;
 double uv_dot_product = 70;
 double vu_dot_product = 70;
 
-mat4d u_cross_matrix = {0, -3, 2, 0, 3, 0, -1, 0, -2, 1, 0, 0, 0, 0, 0, 0};
-mat4d v_cross_matrix = {0, -7, 7, 0, 7, 0, -7, 0, -7, 7, 0, 0, 0, 0, 0, 0};
+vec4d uu_add = {.vex = {2, 4, 6, 8}};
+vec4d uv_add = {.vex = {8, 9, 10, 11}};
+vec4d vv_add = {.vex = {14, 14, 14, 14}};
+vec4d vu_add = {.vex = {8, 9, 10, 11}};
 
-vec4d uu_cross_product = {0, 0, 0, 0};
-vec4d vv_cross_product = {0, 0, 0, 0};
-vec4d uv_cross_product = {2*7-3*7, 3*7-1*7, 1*7-2*7, 0};
-vec4d vu_cross_product = {7*3-7*2, 7*1-7*3, 7*2-7*1, 0};
+vec4d u1_scale = {.vex = {1, 2, 3, 4}};
+vec4d u2_scale = {.vex = {2, 4, 6, 8}};
 
-mat4d uu_tensor_product = {1, 2, 3, 4, 2, 4, 6, 8, 3, 6, 9, 12, 4, 8, 12, 16};
-mat4d vv_tensor_product = {49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49};
-mat4d uv_tensor_product = {7, 7, 7, 7, 14, 14, 14, 14, 21, 21, 21, 21, 28, 28, 28, 28};
-mat4d vu_tensor_product = {7, 14, 21, 28, 7, 14, 21, 28, 7, 14, 21, 28, 7, 14, 21, 28};
+vec4d uu_multiply = {.vex = {1, 4, 9, 16}};
+vec4d uv_multiply = {.vex = {7, 14, 21, 28}};
+vec4d vv_multiply = {.vex = {49, 49, 49, 49}};
+vec4d vu_multiply = {.vex = {7, 14, 21, 28}};
 
-vec4d m_row0 = {1, 2, 3, 4};
-vec4d m_row1 = {5, 6, 7, 8};
-vec4d m_row2 = {9, 10, 11, 12};
-vec4d m_row3 = {13, 14, 15, 16};
+mat4d u_cross_matrix = {.vex = {0, -3, 2, 0, 3, 0, -1, 0, -2, 1, 0, 0, 0, 0, 0, 0}};
+mat4d v_cross_matrix = {.vex = {0, -7, 7, 0, 7, 0, -7, 0, -7, 7, 0, 0, 0, 0, 0, 0}};
 
-vec4d m_col0 = {1, 5, 9, 13};
-vec4d m_col1 = {2, 6, 10, 14};
-vec4d m_col2 = {3, 7, 11, 15};
-vec4d m_col3 = {4, 8, 12, 16};
+vec4d uu_cross_product = {.vex = {0, 0, 0, 0}};
+vec4d vv_cross_product = {.vex = {0, 0, 0, 0}};
+vec4d uv_cross_product = {.vex = {2*7-3*7, 3*7-1*7, 1*7-2*7, 0}};
+vec4d vu_cross_product = {.vex = {7*3-7*2, 7*1-7*3, 7*2-7*1, 0}};
 
-mat4d m_transpose = {1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 16};
-mat4d n_transpose = {7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
+mat4d uu_tensor_product = {.vex = {1, 2, 3, 4, 2, 4, 6, 8, 3, 6, 9, 12, 4, 8, 12, 16}};
+mat4d vv_tensor_product = {.vex = {49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49}};
+mat4d uv_tensor_product = {.vex = {7, 7, 7, 7, 14, 14, 14, 14, 21, 21, 21, 21, 28, 28, 28, 28}};
+mat4d vu_tensor_product = {.vex = {7, 14, 21, 28, 7, 14, 21, 28, 7, 14, 21, 28, 7, 14, 21, 28}};
 
-mat4d mn_multiply = {70, 70, 70, 70, 182, 182, 182, 182, 294, 294, 294, 294, 406, 406, 406, 406};
-mat4d nm_multiply = {196, 224, 252, 280, 196, 224, 252, 280, 196, 224, 252, 280, 196, 224, 252, 280};
+vec4d m_row0 = {.vex = {1, 2, 3, 4}};
+vec4d m_row1 = {.vex = {5, 6, 7, 8}};
+vec4d m_row2 = {.vex = {9, 10, 11, 12}};
+vec4d m_row3 = {.vex = {13, 14, 15, 16}};
 
-vec4d mu_multiply = {30, 70, 110, 150};
-vec4d mv_multiply = {70, 182, 294, 406};
+vec4d m_col0 = {.vex = {1, 5, 9, 13}};
+vec4d m_col1 = {.vex = {2, 6, 10, 14}};
+vec4d m_col2 = {.vex = {3, 7, 11, 15}};
+vec4d m_col3 = {.vex = {4, 8, 12, 16}};
 
-mat4d I123_scale = {1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1};
-mat4d I123_translate = {1, 0, 0, 1, 0, 1, 0, 2, 0, 0, 1, 3, 0, 0, 0, 1};
-mat4d I123_scale_123_translate = {1, 0, 0, 1, 0, 2, 0, 2, 0, 0, 3, 3, 0, 0, 0, 1};
+mat4d m_transpose = {.vex = {1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 16}};
+mat4d n_transpose = {.vex = {7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}};
 
-mat4d r_frustum = {0.40000000000000002220446049250313, 0,
+mat4d mn_multiply = {.vex = {70, 70, 70, 70, 182, 182, 182, 182, 294, 294, 294, 294, 406, 406, 406, 406}};
+mat4d nm_multiply = {.vex = {196, 224, 252, 280, 196, 224, 252, 280, 196, 224, 252, 280, 196, 224, 252, 280}};
+
+vec4d mu_multiply = {.vex = {30, 70, 110, 150}};
+vec4d mv_multiply = {.vex = {70, 182, 294, 406}};
+
+mat4d I123_scale = {.vex = {1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1}};
+mat4d I123_translate = {.vex = {1, 0, 0, 1, 0, 1, 0, 2, 0, 0, 1, 3, 0, 0, 0, 1}};
+mat4d I123_scale_123_translate = {.vex = {1, 0, 0, 1, 0, 2, 0, 2, 0, 0, 3, 3, 0, 0, 0, 1}};
+mat4d I001_10_rotate = {.vex = {0.98480775301220802031565426659654,
+  -0.17364817766693033118663436198403, 0, 0,
+    0.17364817766693033118663436198403,
+    0.98480775301220802031565426659654,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+mat4d I001_n10_rotate = {.vex = {0.98480775301220802031565426659654,
+  0.17364817766693033118663436198403, 0, 0,
+    -0.17364817766693033118663436198403,
+    0.98480775301220802031565426659654,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+
+mat4d r_frustum = {.vex = {0.40000000000000002220446049250313, 0,
   0.20000000000000001110223024625157, 0, 0,
   0.40000000000000002220446049250313,
   -0.20000000000000001110223024625157, 0, 0, 0,
   -1.00100050025012499155252498894697,
-  -2.00100050025012521359712991397828, 0, 0, -1, 0};
-mat4d r_ortho = {0.40000000000000002220446049250313, 0, 0,
+  -2.00100050025012521359712991397828, 0, 0, -1, 0}};
+mat4d r_ortho = {.vex = {0.40000000000000002220446049250313, 0, 0,
   -0.20000000000000001110223024625157, 0,
   0.40000000000000002220446049250313, 0,
   0.20000000000000001110223024625157, 0, 0,
   -0.00100050025012506245934706949896,
-  -1.00100050025012499155252498894697, 0, 0, 0, 1};
-mat4d r_look_at = {-0.57735026918962573105886804114562,
-  0.57735026918962573105886804114562,
-  -0.57735026918962573105886804114562,
-  0.57735026918962573105886804114562,
+  -1.00100050025012499155252498894697, 0, 0, 0, 1}};
+mat4d r_look_at = {.vex = {-0.57735026918962584208117050366127,
+  0.57735026918962584208117050366127,
+  -0.57735026918962584208117050366127,
+  0.57735026918962584208117050366127,
   -0.40824829046386301723003953156876,
   0.40824829046386301723003953156876,
   0.81649658092772603446007906313753,
   -0.81649658092772603446007906313753,
   0.70710678118654746171500846685376,
   0.70710678118654746171500846685376, 0,
-  -1.41421356237309492343001693370752, 0, 0, 0, 1};
+  -1.41421356237309492343001693370752, 0, 0, 0, 1}};
 
 void test_vector()
 {
   test_begin("test_vector");
-  vector(double, 4) v = {1.0, 2.01, 3.007, 4.5};
-  assert(v[0] == 1.0);
-  assert(v[1] == 2.01);
-  assert(v[3] == 4.5);
-  assert(*vector_ptr(double, v) == 1.0);
-  assert(*(vector_ptr(double, v) + 2) == 3.007);
+  vector(double, 4) _v = {1.0, 2.01, 3, 4.5};
+  assert(_v[0] == 1.0);
+  assert(_v[1] == 2.01);
+  assert(_v[2] == 3);
+  assert(_v[3] == 4.5);
+
+  assert_vec4d_equal(vector_add(u, u), uu_add);
+  assert_vec4d_equal(vector_add(u, v), uv_add);
+  assert_vec4d_equal(vector_add(v, v), vv_add);
+  assert_vec4d_equal(vector_add(v, u), vu_add);
+
+  assert_vec4d_equal(vector_scale(u, 1), u1_scale);
+  assert_vec4d_equal(vector_scale(u, 2), u2_scale);
+
+  assert_vec4d_equal(vector_multiply(u, u), uu_multiply);
+  assert_vec4d_equal(vector_multiply(u, v), uv_multiply);
+  assert_vec4d_equal(vector_multiply(v, v), vv_multiply);
+  assert_vec4d_equal(vector_multiply(v, u), vu_multiply);
   test_end("test_vector");
 }
 
@@ -153,8 +188,8 @@ void test_vec4()
   assert(vec4d_length(v) == sqrt(vv_dot_product));
   assert(vec4d_length(z) == 0);
 
-  assert_vec4d_equal(vec4d_normalize(u), (u / vec4d_length(u)));
-  assert_vec4d_equal(vec4d_normalize(v), (v / vec4d_length(v)));
+  assert_vec4d_equal(vec4d_normalize(u), vector_scale(u, 1.0 / vec4d_length(u)));
+  assert_vec4d_equal(vec4d_normalize(v), vector_scale(v, 1.0 / vec4d_length(v)));
   assert_vec4d_equal(vec4d_normalize(z), z);
 
   assert_mat4d_equal(vec4d_cross_matrix(u), u_cross_matrix);
@@ -219,10 +254,13 @@ void test_mat4()
   assert_mat4d_equal(mat4d_translate(mat4d_scale(I, 1, 2, 3), 1, 2, 3), I123_scale_123_translate);
   assert_mat4d_equal(mat4d_translate(mat4d_scale(m, 1, 2, 3), 1, 2, 3), mat4d_multiply(I123_scale_123_translate, m));
 
+  assert_mat4d_equal(mat4d_rotate(I, (vec4d){.vex = {0, 0, 1}}, 10), I001_10_rotate);
+  assert_mat4d_equal(mat4d_rotate(I, (vec4d){.vex = {0, 0, 1}}, -10), I001_n10_rotate);
+
   assert_mat4d_equal(mat4d_frustum(-2, 3, -3, 2, 1, 2000), r_frustum);
   assert_mat4d_equal(mat4d_ortho(-2, 3, -3, 2, 1, 2000), r_ortho);
-  assert_mat4d_equal(mat4d_look_at((vec4d){1}, (vec4d){1}, (vec4d){0,1}), I);
-  assert_mat4d_equal(mat4d_look_at((vec4d){1,1,1,0}, (vec4d){0,0,1,0}, (vec4d){0,0.5,0.5,0}), r_look_at);
+  assert_mat4d_equal(mat4d_look_at((vec4d){.vex = {1}}, (vec4d){.vex = {1}}, (vec4d){.vex = {0,1}}), I);
+  assert_mat4d_equal(mat4d_look_at((vec4d){.vex = {1,1,1,0}}, (vec4d){.vex = {0,0,1,0}}, (vec4d){.vex = {0,0.5,0.5,0}}), r_look_at);
 
   test_end("test_mat4");
 }

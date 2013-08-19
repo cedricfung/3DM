@@ -36,30 +36,32 @@
 extern "C" {
 #endif
 
+typedef union { float ptr[4]; float vex __attribute__((vector_size(16))); } vec4f;
+typedef union { float ptr[16]; float vex __attribute__((vector_size(64))); } mat4f;
+typedef union { double ptr[4]; double vex __attribute__((vector_size(32))); } vec4d;
+typedef union { double ptr[16]; double vex __attribute__((vector_size(128))); } mat4d;
+
 #ifdef __clang__
-typedef float vec4f __attribute__((ext_vector_type(4)));
-typedef float mat4f __attribute__((ext_vector_type(16)));
-typedef double vec4d __attribute__((ext_vector_type(4)));
-typedef double mat4d __attribute__((ext_vector_type(16)));
-#define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
 #define vector_shuffle __builtin_shufflevector
+#define vector_scale(v,s) ({ __typeof__ (v) _v; __typeof__ (v) _v2; \
+    for (int i = 0; i < sizeof(_v2.ptr) / sizeof(s); i++) { _v2.ptr[i] = s; } \
+    _v.vex = (v).vex * _v2.vex; \
+    _v; })
 #else
-typedef float vec4f __attribute__((vector_size(16)));
-typedef float mat4f __attribute__((vector_size(64)));
-typedef double vec4d __attribute__((vector_size(32)));
-typedef double mat4d __attribute__((vector_size(128)));
-#define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
 #define vector_shuffle __builtin_shuffle
+#define vector_scale(v,s) ({ __typeof__ (v) _v; _v.vex = (v).vex * (s); _v; })
 #endif
 
-#define vector_ptr(type,v) ({__typeof__ (v) _v = (v); (type*)&_v;})
+#define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
+#define vector_add(v1,v2) ({ __typeof__ (v1) _v; _v.vex = (v1).vex + (v2).vex; _v; })
+#define vector_multiply(v1,v2) ({ __typeof__ (v1) _v; _v.vex = (v1).vex * (v2).vex; _v; })
 
 #define vector_print(v,n) do { \
   for (int i = 0; i < n; i++) { \
     if (i % 4 == 3) { \
-      printf("%f\n", (v)[i]); \
+      printf("%f\n", (v).ptr[i]); \
     } else { \
-      printf("%f\t", (v)[i]); \
+      printf("%f\t", (v).ptr[i]); \
     } \
   } \
   printf("\n"); \
@@ -105,7 +107,9 @@ mat4d mat4d_frustum(double l, double r, double b, double t, double n, double f);
 
 mat4d mat4d_perspective(double fov, double aspect, double n, double f);
 
-mat4d mat4d_ortho(double l, double r, double b, double t, double n, double f);
+mat4d mat4d_frustum_ortho(double l, double r, double b, double t, double n, double f);
+
+mat4d mat4d_ortho(double fov, double aspect, double n, double f);
 
 mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up);
 
