@@ -53,6 +53,7 @@ typedef union { double ptr[16]; double vex __attribute__((vector_size(128))); } 
 #endif
 
 #define vector(type,c) __attribute__((vector_size((c)*sizeof(type)))) type
+#define vector_new(...) {.vex = {__VA_ARGS__}}
 #define vector_add(v1,v2) ({ __typeof__ (v1) _v; _v.vex = (v1).vex + (v2).vex; _v; })
 #define vector_multiply(v1,v2) ({ __typeof__ (v1) _v; _v.vex = (v1).vex * (v2).vex; _v; })
 

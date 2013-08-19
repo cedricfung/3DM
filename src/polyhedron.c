@@ -159,8 +159,7 @@ static poly_t *icosahedron_create(poly_t *poly, int n)
     3, 9, 4, 3, 4, 2, 3, 2, 6, 3, 6, 8, 3, 8, 9,
     4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7, 9, 8, 1,
   };
-  const vec4d _R = { .vex = (vector(double,4)){1, M_PHI} };
-  const float radius = vec4d_length(_R);
+  const float radius = vec4d_length((vec4d)vector_new(1, M_PHI));
 
   poly->vertices = malloc(sizeof(icosahedron_vertices));
   if (poly->vertices == NULL) {
@@ -211,10 +210,10 @@ static bool cube_recur(poly_t *poly)
     v2.vex = (vector(double, 4)){vertices[3*i2], vertices[3*i2+1], vertices[3*i2+2]};
     v3.vex = (vector(double, 4)){vertices[3*i3], vertices[3*i3+1], vertices[3*i3+2]};
     v4.vex = (vector(double, 4)){vertices[3*i4], vertices[3*i4+1], vertices[3*i4+2]};
-    v12 = vec4d_normalize((vec4d){.vex = {v1.ptr[0] + v2.ptr[0], v1.ptr[1] + v2.ptr[1]}});
-    v12 = vector_add(v12, ((vec4d){.vex = {0, 0, v1.ptr[2]}}));
-    v34 = vec4d_normalize((vec4d){.vex = {v3.ptr[0] + v4.ptr[0], v3.ptr[1] + v4.ptr[1]}});
-    v34 = vector_add(v34, ((vec4d){.vex = {0, 0, v3.ptr[2]}}));
+    v12 = vec4d_normalize((vec4d)vector_new(v1.ptr[0] + v2.ptr[0], v1.ptr[1] + v2.ptr[1]));
+    v12 = vector_add(v12, (vec4d)vector_new(0, 0, v1.ptr[2]));
+    v34 = vec4d_normalize((vec4d)vector_new(v3.ptr[0] + v4.ptr[0], v3.ptr[1] + v4.ptr[1]));
+    v34 = vector_add(v34, (vec4d)vector_new(0, 0, v3.ptr[2]));
     vertices[++vdi] = v12.ptr[0]; vertices[++vdi] = v12.ptr[1]; vertices[++vdi] = v12.ptr[2]; i12 = (vdi + 1) / 3 - 1;
     vertices[++vdi] = v34.ptr[0]; vertices[++vdi] = v34.ptr[1]; vertices[++vdi] = v34.ptr[2]; i34 = (vdi + 1) / 3 - 1;
     indices[i] = i1; indices[i+1] = i12; indices[i+2] = i4;
@@ -244,8 +243,7 @@ static poly_t *cube_create(poly_t *poly, int n)
     2, 3, 6, 7, 6, 3,
     1, 0, 5, 4, 5, 0
   };
-  const vec4d _R = { .vex = (vector(double,4)){1, 1} };
-  const float radius = vec4d_length(_R);
+  const float radius = vec4d_length((vec4d)vector_new(1, 1));
 
   poly->vertices = malloc(sizeof(cube_vertices));
   if (poly->vertices == NULL) {

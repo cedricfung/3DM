@@ -56,7 +56,7 @@ vec4d vec4d_normalize(vec4d v)
 
 mat4d vec4d_cross_matrix(vec4d v)
 {
-  mat4d m = {.vex = {0}};
+  mat4d m = vector_new(0);
   m.ptr[1] = -v.ptr[2];
   m.ptr[2] = v.ptr[1];
   m.ptr[4] = v.ptr[2];
@@ -85,7 +85,7 @@ bool vec4d_equal(vec4d u, vec4d v)
 
 mat4d mat4d_identity(void)
 {
-  mat4d m = {.vex = {0}};
+  mat4d m = vector_new(0);
   m.ptr[0] = 1;
   m.ptr[5] = 1;
   m.ptr[10] = 1;
@@ -95,7 +95,7 @@ mat4d mat4d_identity(void)
 
 vec4d mat4d_row(mat4d m, int r)
 {
-  vec4d v = {.vex = {0}};
+  vec4d v = vector_new(0);
   r = r * 4;
   v.ptr[0] = m.ptr[r];
   v.ptr[1] = m.ptr[r+1];
@@ -106,7 +106,7 @@ vec4d mat4d_row(mat4d m, int r)
 
 vec4d mat4d_column(mat4d m, int c)
 {
-  vec4d v = {.vex = {0}};
+  vec4d v = vector_new(0);
   v.ptr[0] = m.ptr[c];
   v.ptr[1] = m.ptr[c+4];
   v.ptr[2] = m.ptr[c+8];
@@ -116,7 +116,7 @@ vec4d mat4d_column(mat4d m, int c)
 
 mat4d mat4d_from_vec4d(vec4d r0, vec4d r1, vec4d r2, vec4d r3)
 {
-  mat4d m = {.vex = {0}};
+  mat4d m = vector_new(0);
   for (int i = 0; i < 4; i++) { m.ptr[i] = r0.ptr[i]; }
   for (int i = 0; i < 4; i++) { m.ptr[i+4] = r1.ptr[i]; }
   for (int i = 0; i < 4; i++) { m.ptr[i+8] = r2.ptr[i]; }
@@ -126,7 +126,7 @@ mat4d mat4d_from_vec4d(vec4d r0, vec4d r1, vec4d r2, vec4d r3)
 
 mat4d mat4d_transpose(mat4d m)
 {
-  mat4d mt = {.vex = {0}};
+  mat4d mt = vector_new(0);
   vector(long, 16) mask = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
   mt.vex = vector_shuffle(m.vex, mask);
   return mt;
@@ -134,7 +134,7 @@ mat4d mat4d_transpose(mat4d m)
 
 mat4d mat4d_multiply(mat4d m, mat4d n)
 {
-  mat4d r = {.vex = {0}};
+  mat4d r = vector_new(0);
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       r.ptr[i * 4 + j] = vec4d_dot_product(mat4d_row(m, i), mat4d_column(n, j));
@@ -145,7 +145,7 @@ mat4d mat4d_multiply(mat4d m, mat4d n)
 
 vec4d mat4d_multiply_vec4d(mat4d m, vec4d v)
 {
-  vec4d vr = {.vex = {0}};
+  vec4d vr = vector_new(0);
   vr.ptr[0] = vec4d_dot_product(mat4d_row(m, 0), v);
   vr.ptr[1] = vec4d_dot_product(mat4d_row(m, 1), v);
   vr.ptr[2] = vec4d_dot_product(mat4d_row(m, 2), v);
@@ -186,7 +186,7 @@ mat4d mat4d_rotate(mat4d m, vec4d axis, double degree)
 
 mat4d mat4d_frustum(double l, double r, double b, double t, double n, double f)
 {
-  mat4d m = {.vex = {0}};
+  mat4d m = vector_new(0);
   m.ptr[0] = (2 * n) / (r - l);
   m.ptr[2] = (r + l) / (r - l);
   m.ptr[5] = (2 * n) / (t - b);
@@ -206,7 +206,7 @@ mat4d mat4d_perspective(double fov, double aspect, double n, double f)
 
 mat4d mat4d_frustum_ortho(double l, double r, double b, double t, double n, double f)
 {
-  mat4d m = {.vex = {0}};
+  mat4d m = vector_new(0);
   m.ptr[0] = 2 / (r - l);
   m.ptr[3] = -(r + l) / (r - l);
   m.ptr[5] = 2 / (t - b);
@@ -226,7 +226,7 @@ mat4d mat4d_ortho(double fov, double aspect, double n, double f)
 
 mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up)
 {
-  vec4d x = {.vex = {0}}, y = {.vex = {0}}, z = {.vex = {0}}, w = {.vex = {0}};
+  vec4d x = vector_new(0), y = vector_new(0), z = vector_new(0), w = vector_new(0);
 
   if (vec4d_equal(eye, center)) {
     return mat4d_identity();
@@ -246,7 +246,7 @@ mat4d mat4d_look_at(vec4d eye, vec4d center, vec4d up)
 
 mat4f mat4d_to_mat4f(mat4d m)
 {
-  mat4f f = {.vex = {0}};
+  mat4f f = vector_new(0);
   for (int i = 0; i < 16; i++) {
     f.ptr[i] = (float)m.ptr[i];
   }
